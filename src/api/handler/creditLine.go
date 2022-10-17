@@ -7,6 +7,7 @@ import (
 	"credit-line-api/src/db"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,7 +47,18 @@ func (h *CreditLineHandler) Check(c *gin.Context) {
 		return
 	}
 
-	if body.CashBalance == 0 && body.MonthlyRevenue == 0 {
+	foundingType := strings.ToLower(body.FoundingType)
+	if foundingType != string(entity.FoundingTypeSME) &&
+		foundingType != string(entity.FoundingTypeStartup) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Unsupported founding type",
+		})
+		return
+	}
+
+	if body.CashBalance <= 0 ||
+		body.MonthlyRevenue <= 0 ||
+		body.RequestedValue <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid credit line request",
 		})
