@@ -18,4 +18,18 @@ The API will be served at `localhost:8080`. If you want, you can customize the p
 
 ## API Documentation
 
-The API docs are at `./openapi.yaml`
+The API endpoint is explained in details at `./openapi.yaml`.
+
+## Unit Tests
+
+To run all unit tests, run at the root directory:
+
+```sh
+go test ./...
+```
+
+To run all unit tests with coverage, use:
+
+```sh
+go test -coverprofile="/tmp/go-cover.$$.tmp" -coverpkg=./... $@ ./... && go tool cover -html="/tmp/go-cover.$$.tmp"
+```
