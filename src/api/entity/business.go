@@ -1,5 +1,7 @@
 package entity
 
+import "strings"
+
 type FoundingType string
 
 const (
@@ -14,8 +16,10 @@ type Business struct {
 }
 
 func NewBusiness(params *CreditLineInput) *Business {
+	foundingType := strings.ToLower(params.FoundingType)
+
 	return &Business{
-		Type:           FoundingType(params.FoundingType),
+		Type:           FoundingType(foundingType),
 		CashBalance:    params.CashBalance,
 		MonthlyRevenue: params.MonthlyRevenue,
 	}
