@@ -2,24 +2,16 @@ package api
 
 import (
 	"credit-line-api/src/api/handler"
-	"credit-line-api/src/db"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func CreateRouter(r *gin.Engine) *gin.Engine {
-	h := &handler.CreditLineHandler{
-		Storage: &db.LocalStorage{},
-	}
+type Handlers struct {
+	CreditLineHandler *handler.CreditLineHandler
+}
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	r.POST("/credit-line/:clientID", h.Check)
+func CreateRouter(h *Handlers, r *gin.Engine) *gin.Engine {
+	r.POST("/credit-line/:clientID", h.CreditLineHandler.Check)
 
 	return r
 }

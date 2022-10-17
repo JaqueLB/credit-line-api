@@ -4,15 +4,15 @@ import (
 	"credit-line-api/src/api/entity"
 )
 
-var localItems = make(map[int]*entity.CreditLineResponse)
-
-type LocalStorage struct{}
+type LocalStorage struct {
+	Items map[int]*entity.CreditLineResponse
+}
 
 func (s *LocalStorage) Get(k int) *entity.CreditLineResponse {
-	return localItems[k]
+	return s.Items[k]
 }
 
 func (s *LocalStorage) Set(k int, v *entity.CreditLineResponse) bool {
-	localItems[k] = v
+	s.Items[k] = v
 	return true
 }
