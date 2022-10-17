@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: Credit Line API
+  description: |-
+    This is an API that determines a credit line given a client.
+  termsOfService: http://swagger.io/terms/
+  license:
+    name: License Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+servers:
+  - url: https://localhost:8080
+tags:
+  - name: credit-line
+    description: To ask for a new credit line
+paths:
+  /credit-line/{clientID}:
+    post:
+      tags:
+        - credit-line
+      summary: Check for a credit line
+      parameters:
+        - name: clientID
+          in: path
+          description: The client that wants to ask for a credit line
+          required: true
+          schema:
+            type: integer
+            default: 0
+      requestBody:
+        description: Check for a new credit line
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditLine'
+        '400':
+          description: Invalid clientID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error429'
+components:
+  schemas:
+    CreditLine:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        approved_value:
+          type: number
+          format: float64
+          example: 110
+    Client:
+      type: object
+      properties:
+        founding_type:
+          type: string
+          enum:
+            - sme
+            - startup
+          example: sme
+        cash_balance:
+          type: number
+          format: float64
+          example: 1100.56
+        monthly_revenue:
+          type: number
+          format: float64
+          example: 5500.56
+        requested_value:
+          type: number
+          format: float64
+          example: 500.50
+        requested_datetime:
+          type: string
+          example: "2022-10-16T16:32:59.860Z"
+    Error400:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Unsupported founding type"
+    Error429:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Too Many Requests" 
+  requestBodies:
+    CreditLine:
+      description: Client object that wants to apply for credit line
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client'

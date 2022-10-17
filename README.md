@@ -18,4 +18,4 @@ The API will be served at `localhost:8080`. If you want, you can customize the p
 
 ## API Documentation
 
-TODO
+The API docs are at `./openapi.yaml`
