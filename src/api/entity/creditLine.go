@@ -11,9 +11,9 @@ type CreditLineInput struct {
 }
 
 type CreditLineResponse struct {
-	Accepted      bool
-	ApprovedValue float64
-	rejectedCount int
+	Accepted      bool    `json:"accepted"`
+	ApprovedValue float64 `json:"approved_value"`
+	RejectedCount int     `json:"-"`
 }
 
 type ICreditLineCalculator interface {
