@@ -67,17 +67,31 @@ func (h *CreditLineHandler) Check(c *gin.Context) {
 
 	// check if credit was approved before
 	res := h.Storage.Get(clientID)
-	if res != nil && res.Accepted {
-		limiter := &limiters.CLAcceptedLimiter{}
-		if !limiter.Get().Allow() {
-			c.JSON(http.StatusTooManyRequests, gin.H{
-				"message": http.StatusText(http.StatusTooManyRequests),
-			})
-			return
-		}
+	if res != nil {
+		if res.Accepted == true {
+			limiter := &limiters.CLAcceptedLimiter{}
+			if !limiter.Get().Allow() {
+				c.JSON(http.StatusTooManyRequests, gin.H{
+					"message": http.StatusText(http.StatusTooManyRequests),
+				})
+				return
+			}
 
-		c.JSON(http.StatusOK, res)
-		return
+			c.JSON(http.StatusOK, res)
+			return
+		} else {
+			if res.RejectedCount >= 3 {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"message": "A sales agent will contact you",
+				})
+				return
+			}
+		}
+	} else {
+		res = &entity.CreditLineResponse{
+			Accepted:      false,
+			RejectedCount: 0,
+		}
 	}
 
 	// calculate the recommended credit line
@@ -89,18 +103,19 @@ func (h *CreditLineHandler) Check(c *gin.Context) {
 		res.Accepted = true
 		res.ApprovedValue = body.RequestedValue
 		h.Storage.Set(clientID, res)
-		c.JSON(http.StatusOK, res)
-		return
+	} else {
+		// in case credit is rejected, limit the access
+		res.RejectedCount = res.RejectedCount + 1
+		h.Storage.Set(clientID, res)
+		limiter := &limiters.CLRejectedLimiter{}
+		if !limiter.Get().Allow() {
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"message": http.StatusText(http.StatusTooManyRequests),
+			})
+			return
+		}
 	}
 
-	// in case credit is rejected, limit the access
-	res.Accepted = false
-	limiter := &limiters.CLRejectedLimiter{}
-	if !limiter.Get().Allow() {
-		c.JSON(http.StatusTooManyRequests, gin.H{
-			"message": http.StatusText(http.StatusTooManyRequests),
-		})
-		return
-	}
-	// TODO: check if client was rejected before, after 3 times give an error
+	c.JSON(http.StatusOK, res)
+	return
 }
